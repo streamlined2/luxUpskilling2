@@ -8,8 +8,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Queue;
 import java.util.function.Consumer;
 
@@ -21,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 public class Client extends Worker {
 	private static final long SLEEP_TIME = 500;
 	private static final int BUFFER_SIZE = 1024;
-	private static final Charset CHARSET = StandardCharsets.UTF_8;
 
 	private final InetAddress serverAddress;
 	private final int port;
@@ -30,11 +27,10 @@ public class Client extends Worker {
 	@Override
 	public void run() {
 		try (Socket socket = new Socket(serverAddress, port);
-				PrintWriter writer = new PrintWriter(
-						new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), CHARSET), BUFFER_SIZE),
-						true);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET),
-						BUFFER_SIZE)) {
+				PrintWriter writer = new PrintWriter(new BufferedWriter(
+						new OutputStreamWriter(socket.getOutputStream(), getCurrentCharset()), BUFFER_SIZE), true);
+				BufferedReader reader = new BufferedReader(
+						new InputStreamReader(socket.getInputStream(), getCurrentCharset()), BUFFER_SIZE)) {
 
 			doWork(reader, writer);
 		} catch (IOException e) {

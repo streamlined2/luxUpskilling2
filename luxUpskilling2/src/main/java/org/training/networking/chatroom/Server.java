@@ -9,8 +9,6 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.NavigableSet;
@@ -26,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class Server extends Worker {
-	private static final Charset CHARSET = StandardCharsets.UTF_8;
 	private static final int ACCEPT_TIMEOUT = 1000;
 	private static final int BUFFER_SIZE = 1024;
 	private static final String EMPTY_AUTHOR = "";
@@ -83,10 +80,11 @@ public class Server extends Worker {
 
 		@Override
 		public void run() {
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), CHARSET),
-					BUFFER_SIZE);
+			try (BufferedReader reader = new BufferedReader(
+					new InputStreamReader(socket.getInputStream(), getCurrentCharset()), BUFFER_SIZE);
 					PrintWriter writer = new PrintWriter(
-							new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), CHARSET), BUFFER_SIZE),
+							new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), getCurrentCharset()),
+									BUFFER_SIZE),
 							true)) {
 
 				greetNewcomer(reader, writer);

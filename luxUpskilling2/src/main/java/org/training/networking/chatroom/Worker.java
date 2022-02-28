@@ -3,6 +3,8 @@ package org.training.networking.chatroom;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
@@ -10,15 +12,21 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class Worker implements Runnable {
+	
+	private static final Charset CURRENT_CHARSET = StandardCharsets.UTF_8;
 
 	protected volatile boolean done = false;
-
+	
 	public boolean isDone() {
 		return done;
 	}
 
 	protected void shutdown() {
 		done = true;
+	}
+	
+	protected static Charset getCurrentCharset() {
+		return CURRENT_CHARSET;
 	}
 
 	protected static void send(PrintWriter writer, String message) {
