@@ -26,6 +26,7 @@ public class Client extends Worker {
 
 	@Override
 	public void run() {
+		log.info("{} started", name);
 		try (Socket socket = new Socket(serverAddress, port);
 				PrintWriter writer = new PrintWriter(new BufferedWriter(
 						new OutputStreamWriter(socket.getOutputStream(), getCurrentCharset()), BUFFER_SIZE), true);
@@ -33,20 +34,26 @@ public class Client extends Worker {
 						new InputStreamReader(socket.getInputStream(), getCurrentCharset()), BUFFER_SIZE)) {
 
 			doWork(reader, writer);
+			log.info("{} stopped", name);
 		} catch (IOException e) {
+			e.printStackTrace();
 			log.error("communication error on client side");
 			throw new CommunicationException("communication error on client side", e);
 		} catch (InterruptedException e) {
+			e.printStackTrace();
 			Thread.currentThread().interrupt();
 		}
 	}
 
 	private void doWork(BufferedReader reader, PrintWriter writer) throws InterruptedException {
+		log.info("{} sends author name", name);
 		communicate(reader, writer, name, 1, System.out::println);
 		int count = 0;
 		while (!isDone() && !Thread.interrupted()) {
-			communicate(reader, writer, composeMessage(count++), System.out::println);
 			Thread.sleep(SLEEP_TIME);
+			String message = composeMessage(count++);
+			log.info("{} sends {}", name, message);
+			communicate(reader, writer, message, System.out::println);
 		}
 	}
 
@@ -54,17 +61,17 @@ public class Client extends Worker {
 		return String.format("message %d of %s", count, name);
 	}
 
-	protected static void communicate(BufferedReader reader, PrintWriter writer, String message, int atLeastResponses,
+	protected void communicate(BufferedReader reader, PrintWriter writer, String message, int atLeastResponses,
 			Consumer<String> sink) {
 		send(writer, message);
-		Queue<String> replies = receiveAtLeast(reader, atLeastResponses);
+		Queue<String> replies = getAtLeastLines(reader, atLeastResponses);
 		replies.forEach(sink);
 	}
 
-	protected static void communicate(BufferedReader reader, PrintWriter writer, String message,
+	protected void communicate(BufferedReader reader, PrintWriter writer, String message,
 			Consumer<String> sink) {
 		send(writer, message);
-		Queue<String> replies = receiveAvailable(reader);
+		Queue<String> replies = getAvailableLines(reader);
 		replies.forEach(sink);
 	}
 

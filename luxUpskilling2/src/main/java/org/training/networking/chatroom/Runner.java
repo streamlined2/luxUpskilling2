@@ -11,10 +11,12 @@ public class Runner {
 	private static final int CLIENT_COUNT = 3;
 	private static final InetAddress SERVER_ADDRESS = InetAddress.getLoopbackAddress();
 	private static final int SERVER_PORT = 4444;
-	private static final long WORKING_TIME = 10_000;
+	private static final long WORKING_TIME = 3_000;
 	private static final long GRACE_TIME = 500;
 
 	public static void main(String[] args) {
+		
+		log.info("simulation started");
 
 		ExecutorService serverService = Executors.newSingleThreadExecutor();
 		ExecutorService clientService = Executors.newFixedThreadPool(CLIENT_COUNT);
@@ -37,9 +39,14 @@ public class Runner {
 			server.shutdown();
 
 			Thread.sleep(GRACE_TIME);
+			
 			clientService.shutdown();
 			serverService.shutdown();
+			
+			log.info("simulation ended");
+			
 		} catch (InterruptedException e) {
+			e.printStackTrace();
 			log.error("runner thread interrupted");
 		}
 

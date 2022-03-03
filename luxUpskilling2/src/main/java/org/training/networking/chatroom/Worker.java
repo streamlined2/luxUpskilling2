@@ -33,7 +33,7 @@ public abstract class Worker implements Runnable {
 		writer.println(message);
 	}
 
-	protected static Queue<String> receiveAvailable(BufferedReader reader) {
+	protected static Queue<String> getAvailableLines(BufferedReader reader) {
 		try {
 			Queue<String> replies = new LinkedList<>();
 			while (reader.ready()) {
@@ -50,26 +50,26 @@ public abstract class Worker implements Runnable {
 		}
 	}
 
-	protected static Queue<String> receiveAtLeast(BufferedReader reader, int atLeast) {
+	protected static Queue<String> getAtLeastLines(BufferedReader reader, int atLeastLines) {
 		try {
 			Queue<String> replies = new LinkedList<>();
-			for (int count = 0; count < atLeast; count++) {
+			for (int count = 0; count < atLeastLines; count++) {
 				String line = reader.readLine();
 				if (line == null) {
 					throw new CommunicationException(
-							String.format("no more data: expected %d lines, received %d", atLeast, replies.size()));
+							String.format("no more data: expected %d lines, received %d", atLeastLines, replies.size()));
 				}
 				replies.add(line);
 			}
 			return replies;
 		} catch (IOException e) {
-			log.error("can't read {} lines of message", atLeast);
-			throw new CommunicationException(String.format("can't read %d lines of message", atLeast), e);
+			log.error("can't read {} lines of message", atLeastLines);
+			throw new CommunicationException(String.format("can't read %d lines of message", atLeastLines), e);
 		}
 	}
 
-	protected static Optional<String> receiveOne(BufferedReader reader) {
-		return Optional.ofNullable(receiveAtLeast(reader, 1).poll());
+	protected static Optional<String> getOneLine(BufferedReader reader) {
+		return Optional.ofNullable(getAtLeastLines(reader, 1).poll());
 	}
 
 }
